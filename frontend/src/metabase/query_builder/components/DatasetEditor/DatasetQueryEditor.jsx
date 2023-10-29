@@ -64,6 +64,7 @@ function DatasetQueryEditor({
 
   return (
     <QueryEditorContainer isActive={isActive}>
+      
       {question.isNative() ? (
         <NativeQueryEditor
           {...props}

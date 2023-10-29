@@ -17,6 +17,8 @@ import type { Suggestion } from "metabase-lib/expressions/suggest";
 import { suggest } from "metabase-lib/expressions/suggest";
 import type { HelpText } from "metabase-lib/expressions/types";
 import type StructuredQuery from "metabase-lib/queries/StructuredQuery";
+import "ace-builds/src-noconflict/mode-prql";
+// import "ace-builds/src-noconflict/prql";
 
 import ExpressionEditorHelpText from "../ExpressionEditorHelpText";
 import ExpressionEditorSuggestions from "../ExpressionEditorSuggestions";
@@ -491,6 +493,7 @@ class ExpressionEditorTextfield extends React.Component<
           <AceEditor
             commands={this.commands}
             mode="text"
+            // mode="prql"
             ref={this.input}
             value={source}
             markers={this.errorAsMarkers(errorMessage)}

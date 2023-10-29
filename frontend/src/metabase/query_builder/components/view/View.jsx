@@ -355,8 +355,31 @@ class View extends Component {
         isSidebarOpen={isSidebarOpen}
         data-testid="query-builder-main"
       >
+        <h1> PRQL Editor</h1>
+        {(() => {
+          const { question, query, card, height, isDirty, isNativeEditorOpen } =
+            this.props;
+            
+          if (question.isDataset() && !query.isEditable()) {
+            return null;
+          }
+          const editor = { editor: "prql" };
+          const editorProps = { ...this.props, ...editor };
+          return (
+            <NativeQueryEditorContainer>
+              <NativeQueryEditor
+                {...editorProps}
+                viewHeight={height}
+                isOpen={query.isEmpty() || isDirty}
+                isInitiallyOpen={isNativeEditorOpen}
+                datasetQuery={card && card.dataset_query}
+              />
+            </NativeQueryEditorContainer>
+          );
+        })()}
+        <h1> Native Editor </h1>
         {isNative ? (
-          this.renderNativeQueryEditor()
+          null // this.renderNativeQueryEditor() 
         ) : (
           <StyledSyncedParametersList
             parameters={parameters}

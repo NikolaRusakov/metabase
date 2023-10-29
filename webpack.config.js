@@ -50,7 +50,7 @@ const CSS_CONFIG = {
 const config = (module.exports = {
   mode: devMode ? "development" : "production",
   context: SRC_PATH,
-
+  experiments: { asyncWebAssembly: true },
   // output a bundle for the app JS and a bundle for styles
   // eventually we should have multiple (single file) entry points for various pieces of the app to enable code splitting
   entry: {
@@ -301,9 +301,7 @@ if (WEBPACK_BUNDLE === "hot") {
   };
 
   config.watchOptions = {
-    ignored: [
-      CLJS_SRC_PATH_DEV + "/**",
-    ],
+    ignored: [CLJS_SRC_PATH_DEV + "/**"],
   };
 
   config.plugins.unshift(

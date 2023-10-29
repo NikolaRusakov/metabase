@@ -27,6 +27,8 @@ export function getEngineNativeAceMode(engine) {
     case "druid":
     case "googleanalytics":
       return "ace/mode/json";
+    case "prql":
+      return "ace/mode/prql";
     default:
       return "ace/mode/sql";
   }

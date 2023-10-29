@@ -158,6 +158,8 @@ const ChartTypeSidebar = ({
           );
         })}
       </OptionList>
+      <OptionLabel>{t`Vega Lite`}</OptionLabel>
+      <OptionList data-testid="display-options-not-sensible"></OptionList>
     </SidebarContent>
   );
 };

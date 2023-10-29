@@ -6,11 +6,14 @@ import _ from "underscore";
 import slugg from "slugg";
 
 import * as ace from "ace-builds/src-noconflict/ace";
+// import PrqlHighlightRules from "ace-builds/src-noconflict/mode-prql";
 import type { Ace } from "ace-builds";
 
 import "ace/ace";
 import "ace/ext-language_tools";
 import "ace/ext-searchbox";
+import "ace/mode-prql";
+import "ace/snippets/prql";
 import "ace/mode-sql";
 import "ace/mode-json";
 import "ace/snippets/text";
@@ -35,7 +38,6 @@ import { checkNotNull } from "metabase/lib/types";
 import { isEventOverElement } from "metabase/lib/dom";
 import { getEngineNativeAceMode } from "metabase/lib/engine";
 import { SQLBehaviour } from "metabase/lib/ace/sql_behaviour";
-
 import type {
   Card,
   CardId,
@@ -88,7 +90,7 @@ type AutocompleteItem = [string, string];
 type OwnProps = typeof NativeQueryEditor.defaultProps & {
   question: Question;
   query: NativeQuery;
-
+  editor?: "prql" | "sql";
   nativeEditorSelectedText?: string;
   modalSnippet?: NativeQuerySnippet;
   viewHeight: number;
@@ -287,14 +289,22 @@ export class NativeQueryEditor extends Component<
       this._editor.setReadOnly(true);
       editorElement?.classList.add("read-only");
     }
-
-    const aceMode = getEngineNativeAceMode(query.engine());
+    let aceMode;
+    if (this.props.editor === "prql") {
+      aceMode = getEngineNativeAceMode("prql");
+    } else {
+      aceMode = getEngineNativeAceMode(query.engine());
+    }
     const session = this._editor.getSession();
 
     if (session.$modeId !== aceMode) {
       session.setMode(aceMode);
+      // if (this.props.editor === "prql") {
+      //   // session.$mode = PrqlHighlightRules();
+      // } else
       if (aceMode.indexOf("sql") >= 0) {
         // monkey patch the mode to add our bracket/paren/braces-matching behavior
+        // session.$mode.$behaviour = new PrqlHighlightRules();
         // @ts-expect-error — SQLBehaviour isn't a class
         session.$mode.$behaviour = new SQLBehaviour();
 
@@ -389,7 +399,9 @@ export class NativeQueryEditor extends Component<
         shouldUpdateUrl: false,
       });
     } else if (query.canRun()) {
-      runQuestionQuery();
+      runQuestionQuery({
+        shouldCompileQuery: this.props.editor === "prql",
+      });
     }
   };
 
@@ -403,9 +415,14 @@ export class NativeQueryEditor extends Component<
       return;
     }
 
-    const editor = checkNotNull<Ace.Editor>(ace.edit(editorElement));
+    const editor = checkNotNull<Ace.Editor>(
+      ace.edit(editorElement, {
+        ...(editor === "prql" && { mode: "ace/mode/prql" }),
+        // selectionStyle: "text",
+      }),
+    );
     this._editor = editor;
-
+    editor.setTheme("ace/theme/clouds_midnight");
     // listen to onChange events
     editor.getSession().on("change", this.onChange);
     editor.getSelection().on("changeCursor", this.handleCursorChange);

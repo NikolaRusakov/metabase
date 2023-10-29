@@ -1,5 +1,6 @@
 import { t } from "ttag";
 import { createAction } from "redux-actions";
+// eslint-disable-next-line import/default
 
 import * as MetabaseAnalytics from "metabase/lib/analytics";
 import { startTimer } from "metabase/lib/performance";
@@ -93,19 +94,32 @@ export const runDirtyQuestionQuery = () => async (dispatch, getState) => {
  * The API queries triggered by this action creator can be cancelled using the deferred provided in RUN_QUERY action.
  */
 export const RUN_QUERY = "metabase/qb/RUN_QUERY";
-export const runQuestionQuery = ({
+export const runQuestionQuery = async ({
   shouldUpdateUrl = true,
   ignoreCache = false,
   overrideWithCard = null,
+  shouldCompileQuery = false,
 } = {}) => {
   return async (dispatch, getState) => {
     dispatch(loadStartUIControls());
     const questionFromCard = card =>
       card && new Question(card, getMetadata(getState()));
 
-    const question = overrideWithCard
+    // const question = overrideWithCard
+    let question = overrideWithCard
       ? questionFromCard(overrideWithCard)
       : getQuestion(getState());
+    const { compile } = await import("prql-js/dist/bundler");
+
+    const query = shouldCompileQuery
+      ? compile(question._card.dataset_query.native.query)
+      : question._card.dataset_query.native.query;
+    // let _card = question._card;
+    question._card.dataset_query.native.query = query;
+    // const question = {
+    //   ...questionPre,
+    //   _card: _card,
+    // };
     const originalQuestion = getOriginalQuestion(getState());
 
     const cardIsDirty = originalQuestion
